@@ -38,16 +38,18 @@ DECLARE @codigoError2 INT
 EXEC Obtener_Empleados_Orden_Alfabetico 1,'localhost','', @codigoError2 OUTPUT;
 
 DECLARE @codigoError3 INT
-EXEC Insertar_Empleado 1, 'localhost', 'Erick Kauffmann', 1, '118910818', NULL, 3, 3, @codigoError3 OUTPUT;
+EXEC Insertar_Empleado 1, 'localhost', 'Erick Kauffmann', 1, '118910818', NULL, 3, 3, 'erick25', 'ekp2511', @codigoError3 OUTPUT;
 DECLARE @codigoError4 INT
-EXEC Insertar_Empleado 1, 'localhost', 'Samuel Valverde', 5, '111100111', NULL, 2, 5, @codigoError4 OUTPUT;
+EXEC Insertar_Empleado 1, 'localhost', 'Samuel Valverde', 5, '111100111', NULL, 2, 5, 'samVal123', 'SV12345', @codigoError4 OUTPUT;
 
-DECLARE @codigoError5 INT
-EXEC Insertar_Usuario 'erick25', 'ekp2511', 2, 1, @codigoError5 OUTPUT;
-DECLARE @codigoError6 INT
-EXEC Insertar_Usuario 'samVal', 'sV12345', 2, 2, @codigoError6 OUTPUT;
-DECLARE @codigoError7 INT
-EXEC Insertar_Usuario 'jUAn000', 'wkla019', 2, 3, @codigoError7 OUTPUT;
+--DECLARE @codigoError5 INT
+--EXEC Insertar_Usuario 'erick25', 'ekp2511', 2, 1, @codigoError5 OUTPUT;
+--DECLARE @codigoError6 INT
+--EXEC Insertar_Usuario 'samVal', 'sV12345', 2, 2, @codigoError6 OUTPUT;
+--DECLARE @codigoError7 INT
+--EXEC Insertar_Usuario 'jUAn000', 'wkla019', 2, 3, @codigoError7 OUTPUT;
 
 DECLARE @codigoError8 INT
 EXEC Validar_Usuario 'localhost', 'erick25', 'ekp2511', @codigoError8 OUTPUT;
+DECLARE @codigoError9 INT
+EXEC Validar_Usuario 'localhost', 'Goku', '12345', @codigoError9 OUTPUT;

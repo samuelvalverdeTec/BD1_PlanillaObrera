@@ -54,6 +54,7 @@ namespace Tarea3.Controllers
                                     empleado.FechaNacimiento = reader["FechaNacimiento"].ToString();
                                     empleado.idPuesto = Convert.ToInt32(reader["idPuesto"]);
                                     empleado.idDepartamento = Convert.ToInt32(reader["idDepartamento"]);
+                                    empleado.idUsuario = Convert.ToInt32(reader["idUsuario"]);
                                     empleado.NombrePuesto = reader["NombrePuesto"].ToString();
                                     result.ListaEmpleados.Add(empleado);
                                 }
@@ -370,6 +371,8 @@ namespace Tarea3.Controllers
                                     usuario.id = Convert.ToInt32(reader["id"]);
                                     usuario.Nombre = reader["UserName"].ToString();
                                     usuario.Password = reader["Password"].ToString();
+                                    usuario.TipoUsuario = Convert.ToInt32(reader["TipoUsuario"]);
+                                    //usuario.NombreEmpleado = reader["NombreEmpleado"].ToString();
                                     result.Usuario = usuario;
                                 }
                             }

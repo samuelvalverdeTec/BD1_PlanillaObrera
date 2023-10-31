@@ -11,7 +11,7 @@ $(document).ready(function() {
     const apiUrlBorrar = 'http://localhost/Tarea3/borrarEmpleado';
     //const apiUrlUsuario = 'http://localhost/Tarea3/usuario';
 
-    var idUsuarioAct = 1;//getQueryStringValues('idUsuario');
+    var idUsuarioAct = getQueryStringValues('idUsuario');
     var postIP = "localhost";
     var idEmpleadoBuscado = 0;
     //console.log(getQueryStringValues('idUsuario'));

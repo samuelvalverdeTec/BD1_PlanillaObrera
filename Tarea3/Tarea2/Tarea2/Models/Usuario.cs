@@ -9,5 +9,8 @@ namespace Tarea3.Models
         public int id;
         public string Nombre;
         public string Password;
+        public int TipoUsuario;
+        public int idEmpleado;
+        public string NombreEmpleado;
     }
 }
