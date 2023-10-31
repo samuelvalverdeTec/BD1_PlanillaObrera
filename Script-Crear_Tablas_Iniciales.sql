@@ -1,6 +1,7 @@
 USE BD_Tarea3
 
-drop table dbo.Empleado;
+--drop table dbo.Empleado;
+--drop table dbo.Usuario;
 
 CREATE TABLE dbo.Empleado
 (
@@ -45,13 +46,18 @@ ALTER TABLE [dbo].[Empleado] WITH CHECK ADD CONSTRAINT
 [FK_Empleado_Puesto] FOREIGN KEY([idPuesto])
 REFERENCES [dbo].[Puesto] ([Id])
 
-CREATE TABLE dbo.UsuarioAdministrador
+CREATE TABLE dbo.Usuario
 (
 	  Id INT IDENTITY (1, 1) NOT NULL PRIMARY KEY
-	, Nombre VARCHAR(125) NOT NULL
+	, UserName VARCHAR(125) NOT NULL
 	, Password VARCHAR(125) NOT NULL
 	, TipoUsuario INT NOT NULL
+	, idEmpleado INT
 );
+
+ALTER TABLE [dbo].[Usuario] WITH CHECK ADD CONSTRAINT
+[FK_Usuario_Empleado] FOREIGN KEY([idEmpleado])
+REFERENCES [dbo].[Empleado] ([Id])
 
 CREATE TABLE [dbo].[DBErrors](
  [ErrorID] [int] IDENTITY(1,1) NOT NULL,

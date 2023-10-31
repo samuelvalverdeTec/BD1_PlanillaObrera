@@ -11,7 +11,7 @@ GO
 -- Description:	Read and Load XML Data in SQL Tables
 -- =============================================
 
-CREATE PROCEDURE [dbo].[ReadAndLoadXML]
+ALTER PROCEDURE [dbo].[ReadAndLoadXML]
 	-- Add the parameters for the stored procedure here
 	@inRutaXML NVARCHAR(500)
 	, @outResultCode INT OUTPUT
@@ -45,6 +45,9 @@ BEGIN
     
 		EXEC sp_xml_preparedocument @hdoc OUTPUT, @Datos/*Toma el identificador y a la variable con el documento y las asocia*/
 
+
+		--LECTURA E INSERCION DE TIPOS DE IDENTIFICACION
+		/*
 		INSERT INTO [dbo].[TipoIdentificacion]
            ([Id]
            ,[Nombre])/*Inserta en la tabla TipoIdentificacion*/
@@ -55,7 +58,10 @@ BEGIN
 		Id VARCHAR(50),
 		Nombre VARCHAR(50)
 		)
+		*/
 
+		--LECTURA E INSERCION DE PUESTOS
+		/*
 		INSERT INTO [dbo].[Puesto]
            ([Id]
 		   ,[Nombre]
@@ -68,7 +74,10 @@ BEGIN
 		Nombre VARCHAR(50),
 		SalarioXHora VARCHAR(50)
 		)
+		*/
 
+		--LECTURA E INSERCION DE DEPARTAMENTOS
+		/*
 		INSERT INTO [dbo].[Departamento]
            ([Id]
 		   ,[Nombre])/*Inserta en la tabla Departamento*/
@@ -79,6 +88,25 @@ BEGIN
 		Id VARCHAR(50),
 		Nombre VARCHAR(50)
 		)
+		*/
+
+		--LECTURA E INSERCION DE USUARIOS
+		/*
+		INSERT INTO [dbo].[Usuario]
+           ([Password]
+		   ,[TipoUsuario]
+		   ,[UserName]
+		   )/*Inserta en la tabla Usuario*/
+		SELECT *
+		FROM OPENXML (@hdoc, '/Catalogos/UsuariosAdministradores/Usuario' , 1)/*Lee los contenidos del XML y para eso necesita un identificador,el 
+		PATH del nodo y el 1 que sirve para retornar solo atributos*/
+		WITH(/*Dentro del WITH se pone el nombre y el tipo de los atributos a retornar*/
+		Pwd VARCHAR(50),
+		tipo VARCHAR(50),
+		Username VARCHAR(50)
+		)
+		*/
+
 
 		EXEC sp_xml_removedocument @hdoc/*Remueve el documento XML de la memoria*/
 

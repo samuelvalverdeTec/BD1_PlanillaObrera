@@ -14,5 +14,7 @@ namespace Tarea3.Models
         public string FechaNacimiento;
         public int idPuesto;
         public int idDepartamento;
+        public string UserName;
+        public string Password;
     }
 }

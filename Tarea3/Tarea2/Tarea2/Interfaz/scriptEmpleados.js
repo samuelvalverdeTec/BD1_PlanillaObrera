@@ -207,7 +207,7 @@ $(document).ready(function() {
     }
 
 
-    function insertarEmpleado(idUsuarioAct, postIP, nombre, idTipoIdentificacion, identificacion, fechaNacimiento, idPuesto, idDepartamento) {
+    function insertarEmpleado(idUsuarioAct, postIP, nombre, idTipoIdentificacion, identificacion, fechaNacimiento, idPuesto, idDepartamento, userName, password) {
         $.ajax({
         type: "POST",
         url: apiUrlInsertar,
@@ -222,7 +222,9 @@ $(document).ready(function() {
             "Identificacion": identificacion,
             "FechaNacimiento": fechaNacimiento,
             "idPuesto": idPuesto,
-            "idDepartamento": idDepartamento
+            "idDepartamento": idDepartamento,
+            "UserName": userName,
+            "Password": password
         }),
         success: function(data) {
             data = JSON.parse(data);
@@ -431,6 +433,8 @@ $(document).ready(function() {
         $('#Insertar_PopUp #txtNombreEmpleado').val("");
         $('#Insertar_PopUp #txtIdentificacionEmpleado').val("");
         $('#Insertar_PopUp #txtFechaNacimientoEmpleado').val("");
+        $('#Insertar_PopUp #txtUserNameEmpleado').val("");
+        $('#Insertar_PopUp #txtPasswordEmpleado').val("");
     }
 
     function limpiarFormModif(){
@@ -496,13 +500,25 @@ $(document).ready(function() {
         var nombreEmpleado = $('#Insertar_PopUp #txtNombreEmpleado').val();
         var identificacionEmpleado = $('#Insertar_PopUp #txtIdentificacionEmpleado').val();
         var fechaNacimientoEmpleado = $('#Insertar_PopUp #txtFechaNacimientoEmpleado').val();
+        var username = $('#Insertar_PopUp #txtUserNameEmpleado').val();
+        var password = $('#Insertar_PopUp #txtPasswordEmpleado').val();
         //alert("Nombre: " + nombreArticulo + "   Precio: " + precioArticulo);
         if(idPuesto == -1 || idDepartamento == -1 || idTipoIdentificacion == -1){
             alert("Seleccione alguna opcion para puesto, departamento y tipo de identificacion");
         }
         else{
             if(!isNumeric(nombreEmpleado)){
-                insertarEmpleado(idUsuarioAct, postIP, nombreEmpleado, idTipoIdentificacion, identificacionEmpleado, fechaNacimientoEmpleado, idPuesto, idDepartamento);
+                if(!isNumeric(username)){
+                    if(!isNumeric(password)){
+                        insertarEmpleado(idUsuarioAct, postIP, nombreEmpleado, idTipoIdentificacion, identificacionEmpleado, fechaNacimientoEmpleado, idPuesto, idDepartamento, username, password);
+                    }
+                    else{
+                        alert("El password debe ser un string");
+                    }
+                }
+                else{
+                    alert("El username debe ser un string");
+                }
             }
             else{
                 alert("El nombre debe ser un string");

@@ -286,6 +286,8 @@ namespace Tarea3.Controllers
                         cmd.Parameters.Add(new SqlParameter("@inFechaNacimiento", request.FechaNacimiento));
                         cmd.Parameters.Add(new SqlParameter("@inIdPuesto", request.idPuesto));
                         cmd.Parameters.Add(new SqlParameter("@inIdDepartamento", request.idDepartamento));
+                        cmd.Parameters.Add(new SqlParameter("@inUserName", request.UserName));
+                        cmd.Parameters.Add(new SqlParameter("@inPassword", request.Password));
 
                         SqlParameter return_Value = new SqlParameter("@outResultCode", SqlDbType.Int);
                         return_Value.Direction = ParameterDirection.Output;
