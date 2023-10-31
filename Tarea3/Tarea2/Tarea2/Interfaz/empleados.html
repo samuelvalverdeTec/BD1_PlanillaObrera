@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Empleados</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Empleados</h1><br>
+        <div class="table">
+          <div class="row">
+              <div class="col-4">
+                <label for="fname">Filtro Nombre:</label>
+                <input type="text" id="fname" name="fname">
+              </div>
+              <div class="col-4">
+                <button type="button" id="btnFiltrarNombre" class="btn btn-primary" >Filtrar Nombre</button>
+              </div>
+              <div class="col-4"></div>
+          </div><br>
+
+          <div class="row">
+            <div class="col-1"></div>
+            <div class="col-3">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#Insertar_PopUp">Insertar</button>
+            </div>
+            <div class="col-3">
+              <button id="openModif" type="button" class="btn btn-primary">Modificar</button>
+            </div>
+            <div class="col-3">
+              <button id="openBorrar" type="button" class="btn btn-primary">Borrar</button>
+            </div>
+            <div class="col-2"></div>
+        </div>
+      </div>
+        <ul id="listEmpleado" class="list-group"></ul>
+    </div>
+    
+    <div id="Insertar_PopUp" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Insertar Empleado</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <select id="PuestosInsertar" name="PuestosInsertar">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="DepartamentosInsertar" name="DepartamentosInsertar">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="IdTipoIdentificacionInsertar" name="IdTipoIdentificacionInsertar">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtNombreEmpleado">Nombre:</label>
+                        <input type="text" class="form-control" id="txtNombreEmpleado" placeholder="Ingrese nombre del Empleado">
+                    </div>
+                    <div class="form-group">
+                        <label for="txtIdentificacionEmpleado">Identificación:</label>
+                        <input type="text" class="form-control" id="txtIdentificacionEmpleado" placeholder="Ingrese la Identificación del Empleado">
+                    </div>
+                    <div class="form-group">
+                        <label for="txtFechaNacimientoEmpleado">Fecha de Nacimiento:</label>
+                        <input type="text" class="form-control" id="txtFechaNacimientoEmpleado" placeholder="Ingrese la Fecha de Nacimiento del Empleado">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button id='btnInsertar' type="button" class="btn btn-primary">Insertar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div id="Val_Modif_PopUp" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Validar Artículo</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                      <label for="txtCodigoModif">Código:</label>
+                      <input type="text" class="form-control" id="txtCodigoModif" placeholder="Ingrese código del Artículo">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button id='btnValModif' type="button" class="btn btn-primary">Validar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div> -->
+      <div id="Modificar_PopUp" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Modificar Empleado</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="txtIdentificacionModif">Identificación:</label>
+                        <input type="text" class="form-control" id="txtIdentificacionModif" placeholder="Ingrese la Identificación del Empleado">
+                    </div>
+                    <div class="form-group">
+                      <button id='btnValModif' type="button" class="btn btn-primary">Validar</button>
+                    </div>
+                    <div id="datosModif">
+                        <div class="form-group">
+                            <select id="PuestosModif" name="PuestosModif">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select id="DepartamentosModif" name="DepartamentosModif">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select id="IdTipoIdentificacionModif" name="IdTipoIdentificacionModif">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtNombreEmpleadoModif">Nombre:</label>
+                            <input type="text" class="form-control" id="txtNombreEmpleadoModif" placeholder="Ingrese nombre del Empleado">
+                        </div>
+                        <div class="form-group">
+                            <label for="txtIdentificacionEmpleadoModif">Identificación:</label>
+                            <input type="text" class="form-control" id="txtIdentificacionEmpleadoModif" placeholder="Ingrese la Identificación del Empleado">
+                        </div>
+                        <div class="form-group">
+                            <label for="txtFechaNacimientoEmpleadoModif">Fecha de Nacimiento:</label>
+                            <input type="text" class="form-control" id="txtFechaNacimientoEmpleadoModif" placeholder="Ingrese la Fecha de Nacimiento del Empleado">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button id='btnModificar' type="button" class="btn btn-primary">Modificar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="Borrar_PopUp" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Borrar Empleado</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="txtIdentificacionBorrar">Identificación:</label>
+                        <input type="text" class="form-control" id="txtIdentificacionBorrar" placeholder="Ingrese la Identificación del Empleado">
+                    </div>
+                    <div class="form-group">
+                      <button id='btnValBorrar' type="button" class="btn btn-primary">Validar</button>
+                    </div>
+                    <div id="datosBorrar">
+                        <div class="form-group">
+                            <h5 class="modal-title">Confirme que desea borrar este empleado</h5>
+                        </div>
+                        <div class="form-group">
+                            <label for="PuestoEmpleadoBorrar">Puesto:</label>
+                            <label type="text" class="form-control" id="PuestoEmpleadoBorrar">
+                        </div>
+                        <div class="form-group">
+                            <label for="DepartamentoEmpleadoBorrar">Departamento:</label>
+                            <label type="text" class="form-control" id="DepartamentoEmpleadoBorrar">
+                        </div>
+                        <div class="form-group">
+                            <label for="IdTipoIdentificacionBorrar">TipoIdentificacion:</label>
+                            <label type="text" class="form-control" id="IdTipoIdentificacionBorrar">
+                        </div>
+                        <div class="form-group">
+                            <label for="txtNombreEmpleadoModif">Nombre:</label>
+                            <label type="text" class="form-control" id="txtNombreEmpleadoModif">
+                        </div>
+                        <div class="form-group">
+                            <label for="txtIdentificacionEmpleadoModif">Identificación:</label>
+                            <label type="text" class="form-control" id="txtIdentificacionEmpleadoModif">
+                        </div>
+                        <div class="form-group">
+                            <label for="txtFechaNacimientoEmpleadoModif">Fecha de Nacimiento:</label>
+                            <label type="text" class="form-control" id="txtFechaNacimientoEmpleadoModif">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button id='btnBorrar' type="button" class="btn btn-primary">Borrar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Add jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="scriptEmpleados.js"></script>
+</body>
+</html>
