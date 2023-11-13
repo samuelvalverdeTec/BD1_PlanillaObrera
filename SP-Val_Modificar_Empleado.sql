@@ -11,7 +11,7 @@ GO
 -- Create date: 30/10/2023
 -- Description:	valida que un articulo de la tabla Empleado exista para poder modificarlo
 -- =============================================
-CREATE PROCEDURE [dbo].[Validar_Modificar_Empleado] 
+ALTER PROCEDURE [dbo].[Validar_Modificar_Empleado] 
 	-- Add the parameters for the stored procedure here
 	@inIdUsuarioActual INT
 	, @inPostIP VARCHAR(100)
@@ -46,18 +46,18 @@ BEGIN
 			INNER JOIN dbo.Puesto P 
 			ON E.[idPuesto] = P.[Id]
 			WHERE Identificacion = @inIdentificacion and E.[esActivo] = 1
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Intento de modificar artículo", 
-			--"Descripcion": "'+@inCodigo+'", "artículo existe"}');
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Intento de modificar empleado", 
+			"Descripcion": "'+@inIdentificacion+'", "empleado existe"}');
 		END
 		ELSE
 		BEGIN
-			SET @outResultCode = 50009;  -- ERROR articulo no existe
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Intento de modificar artículo", 
-			--"Descripcion": "'+@inCodigo+'", "artículo no existe"}');
+			SET @outResultCode = 50009;  -- ERROR empleado no existe
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Intento de modificar empleado", 
+			"Descripcion": "'+@inIdentificacion+'", "empleado no existe"}');
 		END
 	END TRY
 	BEGIN CATCH

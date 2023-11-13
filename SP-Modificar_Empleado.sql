@@ -11,7 +11,7 @@ GO
 -- Create date: 25/10/2023
 -- Description:	modifica un empleado de la tabla Empleado
 -- =============================================
-CREATE PROCEDURE [dbo].[Modificar_Empleado] 
+ALTER PROCEDURE [dbo].[Modificar_Empleado] 
 	-- Add the parameters for the stored procedure here
 	@inIdUsuarioActual INT
 	, @inPostIP VARCHAR(100)
@@ -55,12 +55,12 @@ BEGIN
 				, @idDepartamentoAnterior = E.[idDepartamento]
 			FROM dbo.Empleado E 
 			WHERE Id = @inIdEmpleadoBuscado and E.[esActivo] = 1;
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Modificación de artículo no exitosa", 
-			--"Descripcion": "id: '+CONVERT(VARCHAR, @idArticulo)+'", "id clase artículo anterior: '+CONVERT(VARCHAR, @idCAAnterior)+'", "código anterior: '+@codigoAnterior+'", "nombre anterior: '+@nombreAnterior+'", "precio anterior: '+CONVERT(VARCHAR, @precioAnterior)
-			--+'", "id clase artículo nuevo: '+CONVERT(VARCHAR, @inIdClaseArticulo)+'", "código nuevo: '+@inCodigo+'", "nombre nuevo: '+@inNombre+'", "precio nuevo: '+CONVERT(VARCHAR, @inPrecio)
-			--+'", "descripción del error: '+ERROR_MESSAGE()+'"}');
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Modificación de empleado no exitosa", 
+			"Descripcion": "id: '+CONVERT(VARCHAR, @idEmpleado)+'", "id tipo identificacion anterior: '+CONVERT(VARCHAR, @idTDAnterior)+'", "identificacion anterior: '+@identificacionAnterior+'", "nombre anterior: '+@nombreAnterior+'", "id puesto anterior: '+CONVERT(VARCHAR, @idPuestoAnterior)+'", "id departamento anterior: '+CONVERT(VARCHAR, @idDepartamentoAnterior)
+			+'", "id tipo identificacion nuevo: '+CONVERT(VARCHAR, @inIdTipoIdentificacion)+'", "identificacion nuevo: '+@inIdentificacion+'", "nombre nuevo: '+@inNombre+'", "id puesto nuevo: '+CONVERT(VARCHAR, @inIdPuesto)+'", "id departamento nuevo: '+CONVERT(VARCHAR, @inIdDepartamento)
+			+'", "descripción del error: '+ERROR_MESSAGE()+'"}');
 		END
 		ELSE
 		BEGIN
@@ -83,11 +83,11 @@ BEGIN
 					 , idPuesto = @inIdPuesto
 					 , idDepartamento = @inIdDepartamento
 				WHERE Id = @inIdEmpleadoBuscado and esActivo = 1;
-				--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-				--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-				--'{"TipoAccion": "Modificación de artículo exitosa", 
-				--"Descripcion": "id: '+CONVERT(VARCHAR, @idArticulo)+'", "id clase artículo anterior: '+CONVERT(VARCHAR, @idCAAnterior)+'", "código anterior: '+@codigoAnterior+'", "nombre anterior: '+@nombreAnterior+'", "precio anterior: '+CONVERT(VARCHAR, @precioAnterior)
-				--+'", "id clase artículo nuevo: '+CONVERT(VARCHAR, @inIdClaseArticulo)+'", "código nuevo: '+@inCodigo+'", "nombre nuevo: '+@inNombre+'", "precio nuevo: '+CONVERT(VARCHAR, @inPrecio)+'"}');
+				INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+				VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+				'{"TipoAccion": "Modificación de empleado exitosa", 
+				"Descripcion": "id: '+CONVERT(VARCHAR, @idEmpleado)+'", "id tipo identificacion anterior: '+CONVERT(VARCHAR, @idTDAnterior)+'", "identificacion anterior: '+@identificacionAnterior+'", "nombre anterior: '+@nombreAnterior+'", "id puesto anterior: '+CONVERT(VARCHAR, @idPuestoAnterior)+'", "id departamento anterior: '+CONVERT(VARCHAR, @idDepartamentoAnterior)
+				+'", "id tipo identificacion nuevo: '+CONVERT(VARCHAR, @inIdTipoIdentificacion)+'", "identificacion nuevo: '+@inIdentificacion+'", "nombre nuevo: '+@inNombre+'", "id puesto nuevo: '+CONVERT(VARCHAR, @inIdPuesto)+'", "id departamento nuevo: '+CONVERT(VARCHAR, @inIdDepartamento)+'"}');
 			COMMIT TRANSACTION tUpdateEmpleado 
 		END
 	END TRY

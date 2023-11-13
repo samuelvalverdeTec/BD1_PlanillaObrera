@@ -11,7 +11,7 @@ GO
 -- Create date: 30/10/2023
 -- Description:	valida que un empleado de la tabla Empleado exista para poder borrarlo
 -- =============================================
-CREATE PROCEDURE [dbo].[Validar_Borrar_Empleado] 
+ALTER PROCEDURE [dbo].[Validar_Borrar_Empleado] 
 	-- Add the parameters for the stored procedure here
 	@inIdUsuarioActual INT
 	, @inPostIP VARCHAR(100)
@@ -46,18 +46,18 @@ BEGIN
 			INNER JOIN dbo.Puesto P 
 			ON E.[idPuesto] = P.[Id]
 			WHERE Identificacion = @inIdentificacion and E.[esActivo] = 1
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Intento de borrar artículo", 
-			--"Descripcion": "'+@inCodigo+'", "artículo existe"}');
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Intento de borrar empleado", 
+			"Descripcion": "'+@inIdentificacion+'", "empleado existe"}');
 		END
 		ELSE
 		BEGIN
 			SET @outResultCode = 50012;  -- ERROR articulo no existe
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Intento de borrar artículo", 
-			--"Descripcion": "'+@inCodigo+'", "artículo no existe"}');
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Intento de borrar empleado", 
+			"Descripcion": "'+@inIdentificacion+'", "empleado no existe"}');
 		END
 	END TRY
 	BEGIN CATCH

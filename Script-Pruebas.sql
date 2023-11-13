@@ -1,5 +1,11 @@
 USE BD_Tarea3;
 
+delete from MovimientoPlanilla where Id>0;
+DBCC CHECKIDENT ('MovimientoPlanilla', RESEED, 0);
+
+delete from SemanaPlanillaXEmpleado where Id>0;
+DBCC CHECKIDENT ('SemanaPlanillaXEmpleado', RESEED, 0);
+
 delete from DeduccionXEmpleado where Id>0;
 DBCC CHECKIDENT ('DeduccionXEmpleado', RESEED, 0);
 
@@ -17,6 +23,9 @@ DBCC CHECKIDENT ('MesPlanilla', RESEED, 0);
 
 delete from Empleado where Id>0;
 DBCC CHECKIDENT ('Empleado', RESEED, 0);
+
+delete from EventLog where Id>0;
+DBCC CHECKIDENT ('EventLog', RESEED, 0);
 
 delete from Usuario where Id>3;
 DBCC CHECKIDENT ('Usuario', RESEED, 3);
@@ -56,7 +65,10 @@ SELECT * FROM JornadaXEmpleadoXSemana; --Muestra toda la tabla
 SELECT * FROM MarcaAsistencia; --Muestra toda la tabla
 SELECT * FROM MesPlanilla; --Muestra toda la tabla
 SELECT * FROM SemanaPlanilla; --Muestra toda la tabla
+SELECT * FROM SemanaPlanillaXEmpleado; --Muestra toda la tabla
+SELECT * FROM MovimientoPlanilla where idTipoMovimiento = 4; --Muestra toda la tabla
 SELECT * FROM DBErrors;
+SELECT * FROM EventLog;
 
 DECLARE @codigoError1 INT
 EXEC ReadAndLoadXML 'D:\Erick_TEC_2S-2023\BD\Scripts-Tarea3\Catalogos2.xml', @codigoError1 OUTPUT;
@@ -82,10 +94,25 @@ DECLARE @codigoError9 INT
 EXEC Validar_Usuario 'localhost', 'Goku', '12345', @codigoError9 OUTPUT;
 
 
-DECLARE @codigoError10 INT
---DECLARE @Fecha DATE
---SELECT @Fecha = CONVERT(DATE, '2023-07-06');
-EXEC ReadAndLoadXMLOperaciones 'D:\Erick_TEC_2S-2023\BD\Scripts-Tarea3\OperacionesV2.xml', 
---@Fecha,
-'2023-07-07',
-@codigoError10 OUTPUT;
+DECLARE @FechaAct DATE, @FechaFin DATE
+SELECT @FechaAct = CONVERT(DATE, '2023-07-06')
+SELECT @FechaFin = CONVERT(DATE, '2023-07-15')
+WHILE (@FechaAct <= @FechaFin)
+BEGIN
+
+	DECLARE @codigoError10 INT
+	--DECLARE @Fecha DATE
+	--SELECT @Fecha = CONVERT(DATE, '2023-07-06');
+	EXEC ReadAndLoadXMLOperaciones 'D:\Erick_TEC_2S-2023\BD\Scripts-Tarea3\OperacionesXML.xml', 
+	@FechaAct,
+	--'2023-07-06',
+	@codigoError10 OUTPUT;
+
+	DECLARE @codigoError11 INT
+	--DECLARE @Fecha DATE
+	--SELECT @Fecha = CONVERT(DATE, '2023-07-06');
+	EXEC Calcular_Pagos @FechaAct, --'2023-07-06',
+	@codigoError11 OUTPUT;
+
+	SELECT @FechaAct = DATEADD(DAY, 1, @FechaAct)
+END

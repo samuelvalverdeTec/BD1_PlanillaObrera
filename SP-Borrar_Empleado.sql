@@ -11,7 +11,7 @@ GO
 -- Create date: 25/10/2023
 -- Description:	borra un empleado de la tabla Empleado
 -- =============================================
-CREATE PROCEDURE [dbo].[Borrar_Empleado] 
+ALTER PROCEDURE [dbo].[Borrar_Empleado] 
 	-- Add the parameters for the stored procedure here
 	@inIdUsuarioActual INT
 	, @inPostIP VARCHAR(100)
@@ -63,20 +63,39 @@ BEGIN
 			UPDATE dbo.Empleado
 			SET    esActivo = 0
 			WHERE Identificacion = @inIdentificacion;
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Borrado de artículo exitosa", 
-			--"Descripcion": "id: '+CONVERT(VARCHAR, @idArticulo)+'", "id clase artículo: '+CONVERT(VARCHAR, @idCAAnterior)+'", "código: '+@codigoAnterior+'", "nombre: '+@nombreAnterior+'", "precio: '+CONVERT(VARCHAR, @precioAnterior)+'"}');
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Borrado de empleado exitoso", 
+			"Descripcion": "id: '+CONVERT(VARCHAR, @idEmpleado)+'", "id tipo ident: '+CONVERT(VARCHAR, @idTDAnterior)+'", "identificación: '+@identificacionAnterior+'", "nombre: '+@nombreAnterior+'", "id puesto: '+CONVERT(VARCHAR, @idPuestoAnterior)+'", "id departamento: '+CONVERT(VARCHAR, @idDepartamentoAnterior)+'"}');
+			UPDATE dbo.DeduccionXEmpleado
+			SET esActivo = 0
+			FROM dbo.DeduccionXEmpleado DXE
+			INNER JOIN dbo.Empleado E
+			ON E.Id = @idEmpleado
+			AND DXE.idEmpleado = E.Id
+			INNER JOIN dbo.TipoDeduccion TD
+			ON DXE.idTipoDeduccion = TD.Id
+
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			SELECT @inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Desasociacion empleado con deduccion exitoso", 
+			"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+E.Identificacion+'", "'+E.Nombre+'", "id tipo deduccion: '+CONVERT(VARCHAR, TD.Id)+'"}'
+			FROM dbo.DeduccionXEmpleado DXE
+			INNER JOIN dbo.Empleado E
+			ON E.Id = @idEmpleado
+			AND DXE.idEmpleado = E.Id
+			INNER JOIN dbo.TipoDeduccion TD
+			ON DXE.idTipoDeduccion = TD.Id
 			COMMIT TRANSACTION tDeleteEmpleado
 		END
-		--ELSE
-		--BEGIN
-			--INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
-			--VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
-			--'{"TipoAccion": "Borrado de artículo no exitosa", 
-			--"Descripcion": "id: '+CONVERT(VARCHAR, @idArticulo)+'", "id clase artículo: '+CONVERT(VARCHAR, @idCAAnterior)+'", "código: '+@codigoAnterior+'", "nombre: '+@nombreAnterior+'", "precio: '+CONVERT(VARCHAR, @precioAnterior)
-			--+'", "descripción del error: '+ERROR_MESSAGE()+'"}');
-		--END
+		ELSE
+		BEGIN
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			VALUES (@inIdUsuarioActual, @inPostIP, GETDATE(), 
+			'{"TipoAccion": "Borrado de empleado no exitoso", 
+			"Descripcion": "id: '+CONVERT(VARCHAR, @idEmpleado)+'", "id tipo ident: '+CONVERT(VARCHAR, @idTDAnterior)+'", "identificación: '+@identificacionAnterior+'", "nombre: '+@nombreAnterior+'", "id puesto: '+CONVERT(VARCHAR, @idPuestoAnterior)+'", "id departamento: '+CONVERT(VARCHAR, @idDepartamentoAnterior)
+			+'", "descripción del error: '+ERROR_MESSAGE()+'"}');
+		END
 	END TRY
 	BEGIN CATCH
 

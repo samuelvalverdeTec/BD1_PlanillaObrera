@@ -142,7 +142,6 @@ CREATE TABLE dbo.TipoMovimiento
 CREATE TABLE dbo.MovimientoPlanilla
 (
 	  Id INT IDENTITY NOT NULL PRIMARY KEY
-	, Nombre VARCHAR(50) NOT NULL
 	, Fecha DATETIME 
 	, Monto MONEY NOT NULL
 	, idTipoMovimiento INT NOT NULL
@@ -150,7 +149,19 @@ CREATE TABLE dbo.MovimientoPlanilla
 	, TipoHora INT
 	, idMarcaAsistencia INT
 	, idDeduccionXEmpleado INT
+	, idSemanaPlanillaXEmpleado INT NOT NULL
+	, idEmpleado INT NOT NULL
 );
+--ALTER TABLE dbo.MovimientoPlanilla
+--ADD idEmpleado INT NOT NULL
+
+ALTER TABLE [dbo].[MovimientoPlanilla] WITH CHECK ADD CONSTRAINT
+[FK_MovimientoPlanilla_Empleado] FOREIGN KEY(idEmpleado)
+REFERENCES [dbo].[Empleado] ([Id])
+
+ALTER TABLE [dbo].[MovimientoPlanilla] WITH CHECK ADD CONSTRAINT
+[FK_MovimientoPlanilla_SemanaPlanillaXEmpleado] FOREIGN KEY(idSemanaPlanillaXEmpleado)
+REFERENCES [dbo].[SemanaPlanillaXEmpleado] ([Id])
 
 ALTER TABLE [dbo].[MovimientoPlanilla] WITH CHECK ADD CONSTRAINT
 [FK_MovimientoPlanilla_TipoMovimiento] FOREIGN KEY(idTipoMovimiento)
@@ -207,6 +218,16 @@ CREATE TABLE dbo.Feriado
 	, Fecha DATE NOT NULL
 );
 
+CREATE TABLE dbo.EventLog (
+ Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY
+ , LogDescription VARCHAR(2000) NOT NULL
+ , PostIdUser INT NOT NULL
+ , PostIP VARCHAR(64) NOT NULL
+ , PostTime DATETIME NOT NULL
+);
+ALTER TABLE [dbo].[EventLog] WITH CHECK ADD CONSTRAINT
+[FK_EventLog_Usuario] FOREIGN KEY([PostIdUser])
+REFERENCES [dbo].[Usuario] ([Id])
 
 CREATE TABLE dbo.Usuario
 (

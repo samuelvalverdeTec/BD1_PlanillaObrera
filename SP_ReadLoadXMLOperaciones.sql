@@ -49,6 +49,7 @@ BEGIN
 
 
 
+		BEGIN TRANSACTION tProcesamientoXMLOperaciones
 		
 
 		DECLARE @FechaActMes DATE
@@ -74,15 +75,6 @@ BEGIN
 		,@idSemanaSig INT
 
 
-		SELECT @FechaActMes = CONVERT(DATE, @inFecha)
-		SELECT @NumDia = DAY(@FechaActMes)
-		SELECT @NumMes = MONTH(@FechaActMes)
-		SELECT @fecha_dia_uno = DATEADD(DAY, -DATEPART(DAY, @FechaActMes) +1, @FechaActMes)
-		SELECT @NumDiasMes = DATEDIFF(DD, @fecha_dia_uno, DATEADD(MM, 1, @fecha_dia_uno))
-		SELECT @FechaInicioMes = DATEADD(DAY, -@NumDia+1, @FechaActMes)
-		SELECT @FechaFinMes = DATEADD(DAY, @NumDiasMes-@NumDia, @FechaActMes)
-
-
 		SELECT @FechaAct = CONVERT(DATE, @inFecha)
 		SELECT @NumDiaSemana = DATEPART(weekday, @FechaAct)
 		--SELECT @NumDiaSemana as NumeroDiaSemana
@@ -96,6 +88,18 @@ BEGIN
 			SELECT @FechaInicioSemana = DATEADD(DAY, 5-@NumDiaSemana, @FechaAct)
 			SELECT @FechaFinSemana = DATEADD(DAY, 7, @FechaInicioSemana)
 		END
+
+
+		SELECT @FechaActMes = CONVERT(DATE, @FechaFinSemana)
+		SELECT @NumDia = DAY(@FechaActMes)
+		SELECT @NumMes = MONTH(@FechaActMes)
+		SELECT @fecha_dia_uno = DATEADD(DAY, -DATEPART(DAY, @FechaActMes) +1, @FechaActMes)
+		SELECT @NumDiasMes = DATEDIFF(DD, @fecha_dia_uno, DATEADD(MM, 1, @fecha_dia_uno))
+		SELECT @FechaInicioMes = DATEADD(DAY, -@NumDia+1, @FechaActMes)
+		SELECT @FechaFinMes = DATEADD(DAY, @NumDiasMes-@NumDia, @FechaActMes)
+
+
+		
 		
 		SELECT @FechaInicioSigSemana = @FechaFinSemana
 			 , @FechaFinSigSemana = DATEADD(DAY, 7, @FechaInicioSigSemana)
@@ -177,7 +181,8 @@ BEGIN
 
 		IF NOT EXISTS (SELECT SP.[Id]
 					   FROM dbo.SemanaPlanilla SP
-					   WHERE SP.[FechaInicio] = @FechaInicioSigSemana)
+					   WHERE SP.[FechaInicio] = @FechaInicioSigSemana
+					   AND SP.[FechaFinal] = @FechaFinSigSemana)
 		BEGIN
 			INSERT INTO [dbo].[SemanaPlanilla]
 			   ([FechaInicio]
@@ -185,7 +190,7 @@ BEGIN
 			   ,[idMesPlanilla]
 			   )/*Inserta en la tabla SemanaPlanilla*/
 			   VALUES (@FechaInicioSigSemana, @FechaFinSigSemana,
-					CASE WHEN MONTH(@FechaInicioSemana) = MONTH(@FechaInicioSigSemana)
+					CASE WHEN MONTH(@FechaFinSemana) = MONTH(@FechaFinSigSemana)
 						 THEN @idMes
 						 ELSE @idMesSig
 					END)
@@ -255,6 +260,84 @@ BEGIN
 			INNER JOIN dbo.[Usuario] U
 			ON Emp.Usuario = U.UserName
 
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Insertar empleado exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.IdTipoDocumento+'", "'+Emp.ValorTipoDocumento+'", "'+Emp.Nombre+'", "'+Emp.IdPuesto+'", "'+Emp.IdDepartamento+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoNuevosEmpleados, 1)
+				WITH(
+				Nombre VARCHAR(50),
+				IdTipoDocumento VARCHAR(50),
+				ValorTipoDocumento VARCHAR(50),
+				IdDepartamento VARCHAR(50),
+				IdPuesto VARCHAR(50),
+				Usuario VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.[Usuario] U
+			ON Emp.Usuario = U.UserName
+			INNER JOIN dbo.[Empleado] E
+			ON Emp.ValorTipoDocumento = E.Identificacion
+
+
+		INSERT INTO dbo.DeduccionXEmpleado
+		( [idEmpleado]
+		 ,[idTipoDeduccion]
+		 ,[Monto]
+		 ,[Porcentaje]
+		)
+		SELECT E.Id, TD.Id,
+			   CASE 
+					WHEN TD.Porcentual = 1 THEN TD.Valor
+					ELSE NULL
+			   END
+			 , CASE 
+					WHEN TD.Porcentual = 2 THEN TD.Valor
+					ELSE NULL
+			   END
+		FROM dbo.TipoDeduccion TD
+		, (SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoNuevosEmpleados, 1)
+				WITH(
+				Nombre VARCHAR(50),
+				IdTipoDocumento VARCHAR(50),
+				ValorTipoDocumento VARCHAR(50),
+				IdDepartamento VARCHAR(50),
+				IdPuesto VARCHAR(50),
+				Usuario VARCHAR(50)
+				)
+			) Emp
+		INNER JOIN dbo.[Empleado] E
+		ON Emp.ValorTipoDocumento = E.Identificacion
+		WHERE TD.Obligatoria = 1
+
+
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Asociacion empleado con deduccion exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "id tipo deduccion: '+CONVERT(VARCHAR, TD.Id)+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoNuevosEmpleados, 1)
+				WITH(
+				Nombre VARCHAR(50),
+				IdTipoDocumento VARCHAR(50),
+				ValorTipoDocumento VARCHAR(50),
+				IdDepartamento VARCHAR(50),
+				IdPuesto VARCHAR(50),
+				Usuario VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.Empleado E
+			ON E.Identificacion = Emp.ValorTipoDocumento
+			INNER JOIN dbo.DeduccionXEmpleado DXE
+			ON DXE.idEmpleado = E.Id
+			INNER JOIN dbo.TipoDeduccion TD
+			ON TD.Id = DXE.idTipoDeduccion
+			
+
 
 
 		--VARIABLE PARA ACCEDER A LOS NODOS DE ELIMINAR EMPLEADOS DE UNA FECHA ESPECIFICA
@@ -263,20 +346,69 @@ BEGIN
 		
 		--LECTURA Y ELIMINACION EMPLEADOS
 		
-		   DECLARE @identificacionEmpBorrar VARCHAR(125)
-		   SELECT @identificacionEmpBorrar = Emp.ValorTipoDocumento
-		   FROM
+		   UPDATE dbo.Empleado
+		   SET    esActivo = 0
+		   FROM dbo.Empleado E
+		   INNER JOIN 
 			(SELECT *
 				FROM OPENXML (@hdoc, @rutaNodoEliminarEmpleados , 1)
 				WITH(
 				ValorTipoDocumento VARCHAR(50)
 				)
 			) Emp
-			UPDATE dbo.Empleado
-			SET    esActivo = 0
-			WHERE Identificacion = @identificacionEmpBorrar;
+			ON E.Identificacion = ValorTipoDocumento
+			
+
+			INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+			SELECT 1, 'localhost', @inFecha, 
+			'{"TipoAccion": "Borrar empleado exitoso", 
+			"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+CONVERT(VARCHAR, E.idTipoIdentificacion)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "'+CONVERT(VARCHAR, E.idPuesto)+'", "'+CONVERT(VARCHAR, E.idDepartamento)+'"}'
+			FROM
+			(SELECT *
+					FROM OPENXML (@hdoc, @rutaNodoEliminarEmpleados, 1)
+					WITH(
+					ValorTipoDocumento VARCHAR(50)
+					)
+				) Emp
+				INNER JOIN dbo.[Empleado] E
+				ON Emp.ValorTipoDocumento = E.Identificacion
 			
 		
+		UPDATE dbo.DeduccionXEmpleado
+		SET esActivo = 0
+		FROM dbo.DeduccionXEmpleado DXE
+		INNER JOIN dbo.Empleado E
+		ON DXE.idEmpleado = E.Id
+		INNER JOIN dbo.TipoDeduccion TD
+		ON DXE.idTipoDeduccion = TD.Id
+		INNER JOIN 
+		(SELECT *
+			FROM OPENXML (@hdoc, @rutaNodoEliminarEmpleados , 1)
+			WITH(
+			ValorTipoDocumento VARCHAR(50)
+			)
+		) Emp
+		ON E.Identificacion = Emp.ValorTipoDocumento
+
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Desasociacion empleado con deduccion exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "id tipo deduccion: '+CONVERT(VARCHAR, TD.Id)+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoEliminarEmpleados, 1)
+				WITH(
+				ValorTipoDocumento VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.[Empleado] E
+			ON Emp.ValorTipoDocumento = E.Identificacion
+			INNER JOIN dbo.DeduccionXEmpleado DXE
+			ON DXE.idEmpleado = E.Id
+			INNER JOIN dbo.TipoDeduccion TD
+			ON TD.Id = DXE.idTipoDeduccion
+
+
 
 		--VARIABLE PARA ACCEDER A LOS NODOS DE ASOCIACION EMPLEADO DEDUCCIONES DE UNA FECHA ESPECIFICA
 		DECLARE @rutaNodoAsociacionEmpleadoDeducciones VARCHAR(125);
@@ -314,6 +446,24 @@ BEGIN
 		INNER JOIN dbo.Empleado E
 		ON E.Identificacion = Emp.ValorTipoDocumento
 
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Asociacion empleado con deduccion exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "id tipo deduccion: '+Emp.IdTipoDeduccion+'", "monto: '+Emp.Monto+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoAsociacionEmpleadoDeducciones, 1)
+				WITH(
+				IdTipoDeduccion VARCHAR(50),
+				ValorTipoDocumento VARCHAR(50),
+				Monto VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.TipoDeduccion TD
+			ON TD.Id = CONVERT(INT, Emp.IdTipoDeduccion)
+			INNER JOIN dbo.Empleado E
+			ON E.Identificacion = Emp.ValorTipoDocumento
+
 
 
 		--VARIABLE PARA ACCEDER A LOS NODOS DE DESASOCIACION EMPLEADO DEDUCCIONES DE UNA FECHA ESPECIFICA
@@ -337,6 +487,24 @@ BEGIN
 		) Emp
 		ON DXE.idTipoDeduccion = CONVERT(INT, Emp.IdTipoDeduccion)
 		AND E.Identificacion = Emp.ValorTipoDocumento
+
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Desasociacion empleado con deduccion exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "id tipo deduccion: '+Emp.IdTipoDeduccion+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoDesasociacionEmpleadoDeducciones, 1)
+				WITH(
+				IdTipoDeduccion VARCHAR(50),
+				ValorTipoDocumento VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.[Empleado] E
+			ON Emp.ValorTipoDocumento = E.Identificacion
+			INNER JOIN dbo.DeduccionXEmpleado DXE
+			ON DXE.idEmpleado = E.Id
+			AND DXE.idTipoDeduccion = CONVERT(INT, Emp.IdTipoDeduccion)
 
 
 		
@@ -362,6 +530,25 @@ BEGIN
 				) as Emp
 				INNER JOIN dbo.Empleado E
 				ON E.Identificacion = Emp.ValorTipoDocumento
+				INNER JOIN dbo.TipoJornada TJ
+				ON Emp.IdTipoJornada = TJ.Id
+
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Ingreso de nuevas jornadas exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "id tipo jornada: '+Emp.IdTipoJornada+'", "tipo jornada: '+TJ.Nombre+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoJornadasProximaSemana, 1)
+				WITH(
+				ValorTipoDocumento VARCHAR(50),
+				IdTipoJornada VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.[Empleado] E
+			ON Emp.ValorTipoDocumento = E.Identificacion
+			INNER JOIN dbo.TipoJornada TJ
+			ON Emp.IdTipoJornada = TJ.Id
 
 
 
@@ -395,9 +582,28 @@ BEGIN
 		INNER JOIN dbo.JornadaXEmpleadoXSemana JXEXS
 		ON JXEXS.idEmpleado = E.Id
 		AND JXEXS.idSemanaPlanilla = @idSemana
+
+		INSERT INTO dbo.EventLog (PostIdUser, PostIP, PostTime, LogDescription)
+		SELECT 1, 'localhost', @inFecha, 
+		'{"TipoAccion": "Ingreso de nuevas marcas de asistencia exitoso", 
+		"Descripcion": "'+CONVERT(VARCHAR, E.Id)+'", "'+Emp.ValorTipoDocumento+'", "'+E.Nombre+'", "id semana: '+CONVERT(VARCHAR, JXEXS.idSemanaPlanilla)+'", "hora de entrada: '+Emp.HoraEntrada+'", "hora de salida: '+Emp.HoraSalida+'"}'
+		FROM
+		(SELECT *
+				FROM OPENXML (@hdoc, @rutaNodoMarcasAsistencia, 1)
+				WITH(
+				ValorTipoDocumento VARCHAR(50),
+				HoraEntrada VARCHAR(50),
+				HoraSalida VARCHAR(50)
+				)
+			) Emp
+			INNER JOIN dbo.Empleado E
+			ON E.Identificacion = Emp.ValorTipoDocumento
+			INNER JOIN dbo.JornadaXEmpleadoXSemana JXEXS
+			ON JXEXS.idEmpleado = E.Id
+			AND JXEXS.idSemanaPlanilla = @idSemana
 		
 
-		
+		COMMIT TRANSACTION tProcesamientoXMLOperaciones
 		
 
 
@@ -408,6 +614,11 @@ BEGIN
 	END TRY
 	BEGIN CATCH
 
+		IF @@TRANCOUNT>0  -- error sucedio dentro de la transaccion
+		BEGIN
+			ROLLBACK TRANSACTION tProcesamientoXMLOperaciones; -- se deshacen los cambios realizados
+		END;
+
 		INSERT INTO dbo.DBErrors	VALUES (
 			SUSER_SNAME(),
 			ERROR_NUMBER(),
@@ -416,7 +627,7 @@ BEGIN
 			ERROR_LINE(),
 			ERROR_PROCEDURE(),
 			ERROR_MESSAGE(),
-			GETDATE()
+			@inFecha
 		);
 
 		Set @outResultCode=50005;	-- Error
