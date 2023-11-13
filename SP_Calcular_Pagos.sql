@@ -183,12 +183,14 @@ BEGIN
 			INNER JOIN dbo.SemanaPlanillaXEmpleado SPXE
 			ON SPXE.Id = MP.idSemanaPlanillaXEmpleado
 			AND SPXE.idEmpleado = MP.idEmpleado
+			AND SPXE.idSemanaPlanilla = @idSemana
 			INNER JOIN dbo.SemanaPlanilla SP
 			ON SP.Id = SPXE.idSemanaPlanilla
 			WHERE @idSemana = SP.Id
 			AND MP.idTipoMovimiento <= 3
 			GROUP BY MP.idEmpleado) as MovsCPXE
 			ON SPXE.idEmpleado = MovsCPXE.idEmpleado
+			AND SPXE.idSemanaPlanilla = @idSemana
 
 
 			INSERT INTO dbo.MovimientoPlanilla (Fecha, Monto, idTipoMovimiento, idDeduccionXEmpleado, idEmpleado, idSemanaPlanillaXEmpleado)
@@ -246,12 +248,14 @@ BEGIN
 			INNER JOIN dbo.SemanaPlanillaXEmpleado SPXE
 			ON SPXE.Id = MP.idSemanaPlanillaXEmpleado
 			AND SPXE.idEmpleado = MP.idEmpleado
+			AND SPXE.idSemanaPlanilla = @idSemana
 			INNER JOIN dbo.SemanaPlanilla SP
 			ON SP.Id = SPXE.idSemanaPlanilla
 			WHERE @idSemana = SP.Id
 			AND MP.idTipoMovimiento > 3
 			GROUP BY MP.idEmpleado) as MovsDPXE
 			ON SPXE.idEmpleado = MovsDPXE.idEmpleado
+			AND SPXE.idSemanaPlanilla = @idSemana
 			
 
 		END
